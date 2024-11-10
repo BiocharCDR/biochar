@@ -23,8 +23,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/greena.git
-cd greena
+git clone https://github.com/sustain-studio/sustain-dashboard.git
+cd sustain-dashboard
 ```
 
 ### 2. Install Dependencies
