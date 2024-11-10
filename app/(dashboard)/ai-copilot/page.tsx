@@ -1,7 +1,7 @@
 import React from "react";
 
-const page = () => {
-  return <div>page</div>;
+const AICopilotPage = () => {
+  return <div>AICopilotPage</div>;
 };
 
-export default page;
+export default AICopilotPage;
