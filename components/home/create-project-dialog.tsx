@@ -1,18 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -23,6 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,17 +27,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Loader2, Plus } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import {
   CERTIFICATION_TYPES,
-  CERTIFICATION_DATA,
-  CertificationType,
   getBuildingTypes,
   getTargetLevels,
 } from "@/types/project";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const formSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
@@ -54,25 +52,34 @@ const formSchema = z.object({
   targetLevel: z.string().min(1, "Target level is required"),
   contractValue: z.coerce.number().positive("Contract value must be positive"),
   currency: z.enum(["SGD", "MYR", "IDR", "USD"]),
-  documents: z
-    .instanceof(FileList)
-    .optional()
-    .refine((files) => {
-      if (!files) return true;
-      return Array.from(files).every((file) => file.type === "application/pdf");
-    }, "Only PDF files are allowed"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 const defaultValues: Partial<FormValues> = {
   floorAreaUnit: "sqm",
-  currency: "SGD",
+  currency: "USD",
 };
 
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      // Validate files are PDFs
+      const validFiles = fileArray.filter(
+        (file) => file.type === "application/pdf"
+      );
+      if (validFiles.length !== fileArray.length) {
+        toast.error("Only PDF files are allowed");
+      }
+      setSelectedFiles(validFiles);
+    }
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -89,20 +96,16 @@ export function CreateProjectDialog() {
     }
   }, [selectedCertification, form]);
 
-  async function uploadFiles(files: FileList | null): Promise<string[]> {
-    if (!files || files.length === 0) return [];
+  type FileUploadEvent = React.ChangeEvent<HTMLInputElement>;
+
+  async function uploadFiles(): Promise<string[]> {
+    if (selectedFiles.length === 0) return [];
 
     const supabase = createSupabaseBrowser();
     const uploadedUrls: string[] = [];
 
-    for (const file of Array.from(files)) {
-      if (file.type !== "application/pdf") {
-        toast.error(`${file.name} is not a PDF file`);
-        continue;
-      }
-
-      const fileExt = "pdf";
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+    for (const file of selectedFiles) {
+      const fileName = `${Date.now()}-${Math.random()}.pdf`;
       const filePath = `projects/${fileName}`;
 
       const { data, error } = await supabase.storage
@@ -128,7 +131,7 @@ export function CreateProjectDialog() {
       const supabase = createSupabaseBrowser();
 
       // Upload documents if any
-      const documentUrls = await uploadFiles(values.documents || null);
+      const documentUrls = await uploadFiles();
 
       // Create project in database
       const { error } = await supabase.from("projects").insert({
@@ -151,6 +154,7 @@ export function CreateProjectDialog() {
       toast.success("Project created successfully");
       setOpen(false);
       form.reset(defaultValues);
+      setSelectedFiles([]);
     } catch (error) {
       toast.error("Failed to create project");
       console.error(error);
@@ -393,28 +397,29 @@ export function CreateProjectDialog() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="documents"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem className="">
-                  <FormLabel>Documents</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept=".pdf"
-                      multiple
-                      onChange={(e) => onChange(e.target.files)}
-                      className="border border-primary text-primary"
-                      {...field}
-                    />
-                  </FormControl>
-
-                  <FormDescription>Upload PDF documents only</FormDescription>
-                  <FormMessage />
-                </FormItem>
+            <FormItem>
+              <FormLabel>Documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept=".pdf"
+                  multiple
+                  onChange={handleFileChange}
+                  className="border border-primary text-primary"
+                />
+              </FormControl>
+              <FormDescription>Upload PDF documents only</FormDescription>
+              {selectedFiles.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm font-medium">Selected files:</p>
+                  <ul className="text-sm text-muted-foreground">
+                    {selectedFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
-            />
+            </FormItem>
 
             <DialogFooter>
               <Button
