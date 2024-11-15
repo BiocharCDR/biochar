@@ -1,23 +1,23 @@
 "use client";
 
-import React from "react";
-import { Mail, ArrowLeft, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
   CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ArrowLeft, Mail, RotateCw } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import React from "react";
+import { toast } from "sonner";
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+
   const email = searchParams.get("email");
   const [isResending, setIsResending] = React.useState(false);
 
@@ -66,7 +66,7 @@ export default function VerifyEmailPage() {
               Check your email
             </h1>
             <p className="text-sm text-muted-foreground">
-              We've sent a verification link to <br />
+              We&apos;ve sent a verification link to <br />
               <span className="font-medium text-foreground">{email}</span>
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function VerifyEmailPage() {
               <p>
                 • Check your email and click the verification link to continue
               </p>
-              <p>• If you don't see it, check your spam folder</p>
+              <p>• If you don&apos;t see it, check your spam folder</p>
               <p>• The link will expire in 24 hours</p>
             </div>
           </div>

@@ -1,10 +1,10 @@
 // lib/auth.ts
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { createSupabaseServer } from "./supabase/server";
 import { cache } from "react";
-import { cookies, headers } from "next/headers";
+import { createSupabaseServer } from "./supabase/server";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -19,7 +19,7 @@ const getSupabase = cache(() => {
 
 /**
  * Get authenticated user with retry logic
- */
+ **/
 export async function getAuthUser(retryCount = 0) {
   const supabase = getSupabase();
 

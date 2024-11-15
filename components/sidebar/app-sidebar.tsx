@@ -1,10 +1,5 @@
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { Home, Layers, Calendar, AlignJustify } from "lucide-react";
-import Image from "next/image";
 import {
   Sidebar,
   SidebarContent,
@@ -19,9 +14,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { UserProfile } from "@/types";
+import { AlignJustify, Calendar, Home, Layers } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 import ActionList from "../icons/ActionList";
 import AiCopilot from "../icons/AiCopilot";
-import { UserProfile } from "@/types";
 
 type NavItem = {
   title: string;

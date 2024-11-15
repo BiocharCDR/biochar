@@ -1,10 +1,3 @@
-import React, { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Loader2 } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,9 +9,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { toast } from "sonner";
-import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { FcGoogle } from "react-icons/fc";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const SignUpSchema = z.object({
   name: z.string().min(2, { message: "Name is too short" }),

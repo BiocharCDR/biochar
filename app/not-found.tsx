@@ -73,8 +73,8 @@ export default function DashboardNotFound() {
             Page not found
           </h1>
           <p className="text-lg text-muted-foreground max-w-[500px]">
-            Sorry, we couldn't find the page you're looking for. The page might
-            have been removed or the link might be broken.
+            Sorry, we couldn&apos;t find the page you&apos;re looking for. The
+            page might have been removed or the link might be broken.
           </p>
         </div>
 

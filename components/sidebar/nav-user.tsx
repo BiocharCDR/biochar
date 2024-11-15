@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,19 +9,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@supabase/supabase-js";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { User } from "@supabase/supabase-js";
 import {
   ChevronDown,
-  UserCircle2,
-  Settings,
+  CircleUserRound,
   CreditCard,
   LogOut,
-  CircleUserRound,
-  Circle,
+  Settings,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ThemeSwitcher } from "./theme-switcher";
 
 interface NavUserProps {
   user: User;
@@ -96,6 +95,9 @@ export function NavUser({ user }: NavUserProps) {
           <DropdownMenuItem>
             <CreditCard className="mr-2 size-4" />
             <span>Billing</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <ThemeSwitcher />
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

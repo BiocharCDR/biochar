@@ -1,11 +1,5 @@
-import React, { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Loader2 } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -15,11 +9,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { toast } from "sonner";
-import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { FcGoogle } from "react-icons/fc";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const SignInSchema = z.object({
   email: z.string().email({ message: "Invalid Email Address" }),
@@ -61,7 +61,7 @@ export default function SignIn() {
     const supabase = createSupabaseBrowser();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
     supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider: provider,
       options: {
         redirectTo: `${siteUrl}/auth/callback?next=${next}`,
       },
@@ -186,7 +186,7 @@ export default function SignIn() {
       </Form>
 
       <p className="mt-6 text-center text-sm text-gray-600">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link
           href={`/signup?next=${next}`}
           className="font-medium text-teal-700 hover:text-teal-600"

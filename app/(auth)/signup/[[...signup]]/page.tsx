@@ -1,11 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { SignUp } from "@/components/auth/signup";
-import Link from "next/link";
 
 const SignUpFallback = () => (
   <div className="flex items-center justify-center h-full">

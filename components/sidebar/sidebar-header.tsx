@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
-import { SidebarTrigger, useSidebar } from "../ui/sidebar";
-import { NavUser } from "./nav-user";
-import { AlignJustify } from "lucide-react";
 import { UserProfile } from "@/types";
-import { Button } from "../ui/button";
+import { AlignJustify } from "lucide-react";
 import NotificationIcon from "../icons/NotificationIcon";
+import { useSidebar } from "../ui/sidebar";
+import { NavUser } from "./nav-user";
 
 interface SidebarHeaderProps {
   user: UserProfile;

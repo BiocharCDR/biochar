@@ -1,9 +1,6 @@
 "use client";
-import { Suspense } from "react";
 import SignIn from "@/components/auth/signin";
-
-import Image from "next/image";
-import Link from "next/link";
+import { Suspense } from "react";
 
 const SignInFallback = () => (
   <div className="flex items-center justify-center h-full">
