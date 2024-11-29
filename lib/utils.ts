@@ -1,6 +1,45 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { DBProject } from "./data/project";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
+}
+
+// lib/utils/project.ts
+export function getProjectStageNumber(stage: string): number {
+  const stages = ["pre_design", "design", "construction", "verification"];
+  return stages.indexOf(stage) + 1;
+}
+
+export function getProjectStatus(project: DBProject): string {
+  if (project.red_flag) return "At Risk";
+  if (project.progress === 100) return "Completed";
+  if (project.progress === 0) return "Not Started";
+  return "In Progress";
+}
+
+export function getStageColor(stage: string): string {
+  switch (stage) {
+    case "pre_design":
+      return "bg-blue-100 text-blue-800";
+    case "design":
+      return "bg-purple-100 text-purple-800";
+    case "construction":
+      return "bg-orange-100 text-orange-800";
+    case "verification":
+      return "bg-green-100 text-green-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
+export function formatCurrency(value: number, currency: string): string {
+  if (value === 0) return "0";
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: currency,
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
 }

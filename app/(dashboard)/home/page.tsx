@@ -1,87 +1,86 @@
-import { Suspense } from "react";
+import DashboardMetrics from "@/components/home/dashboard-metrics";
+import ProductionChart from "@/components/home/production-chart";
+import QuickActions from "@/components/home/quick-actions";
+import RecentActivities from "@/components/home/recent-activities";
+import { createSupabaseServer } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-// import { getProjects } from "@/lib/projects"; // You'll need to create this
-
-import { ProjectHeader } from "@/components/home/projects-header";
-import { ProjectsTable } from "@/components/home/projects-table";
-import { ProjectTableSkeleton } from "@/components/home/projects-table-skeleton";
-import { Project } from "@/types";
-
-const projects: Project[] = [
-  {
-    id: "1",
-    name: "Project Name",
-    consultant: {
-      name: "Johnson",
-      avatar: "/avatars/johnson.png",
-    },
-    client: {
-      name: "Monica",
-      avatar: "/avatars/monica.png",
-    },
-    contractValue: "$500K",
-    certificationTarget: "Certificate name",
-    stage: 2,
-    progress: 35,
-    flag: "No Flag",
-  },
-  {
-    id: "2",
-    name: "Project Name",
-    consultant: {
-      name: "David",
-      avatar: "/avatars/david.png",
-    },
-    client: {
-      name: "Jonathan",
-      avatar: "/avatars/jonathan.png",
-    },
-    contractValue: "$500K",
-    certificationTarget: "Certificate name",
-    stage: 2,
-    progress: 80,
-    flag: "No Flag",
-  },
-  {
-    id: "3",
-    name: "Project Name",
-    consultant: {
-      name: "Samantha",
-      avatar: "/avatars/samantha.png",
-    },
-    client: {
-      name: "Williamson",
-      avatar: "/avatars/williamson.png",
-    },
-    contractValue: "$500K",
-    certificationTarget: "Certificate name",
-    stage: 2,
-    progress: 10,
-    flag: "No Flag",
-  },
-];
 export default async function HomePage() {
-  // Fetch projects from your database
-  // const projects = await getProjects();
+  const supabase = createSupabaseServer();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/signin");
+
+  // Fetch profile data
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  // Fetch metrics data
+  const { data: metrics } = await supabase
+    .from("production_metrics")
+    .select("*")
+    .eq("farmer_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  console.log(metrics);
+
+  // Fetch recent activities
+  const { data: activities } = await supabase
+    .from("activity_logs")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  // Fetch notifications
+  const { data: notifications } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("read", false)
+    .order("created_at", { ascending: false })
+    .limit(5);
 
   return (
-    <div className="space-y-4 p-4">
-      <ProjectHeader
-      // onSearch={(value) => {
-      //   // Handle search - this will need to be moved to a client component
-      //   // or handled through server actions
-      // }}
-      // onFilter={() => {
-      //   // Handle filter
-      // }}
-      // onCreateProject={() => {
-      //   // Handle create project
-      // }}
-      />
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, {profile?.full_name}
+          </h1>
+          <p className="text-muted-foreground">
+            Here's what's happening with your biochar production
+          </p>
+        </div>
+      </div>
 
-      <Suspense fallback={<ProjectTableSkeleton />}>
-        <ProjectsTable projects={projects} />
-      </Suspense>
+      <DashboardMetrics metrics={metrics} />
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <ProductionChart farmerId={user.id} />
+        </div>
+        <div className="col-span-3">
+          <QuickActions />
+        </div>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* <RecentActivities activities={activities} /> */}
+        {notifications && notifications.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold tracking-tight">Notifications</h2>
+            {/* Add Notifications Component */}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

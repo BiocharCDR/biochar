@@ -14,14 +14,23 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { UserProfile } from "@/types";
-import { AlignJustify, Calendar, Home, Layers } from "lucide-react";
+import { User } from "@supabase/supabase-js";
+
+import {
+  AlignJustify,
+  Home,
+  Sprout,
+  Factory,
+  Warehouse,
+  FileSpreadsheet,
+  Settings,
+  Map,
+  AlertCircle,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import ActionList from "../icons/ActionList";
-import AiCopilot from "../icons/AiCopilot";
 
 type NavItem = {
   title: string;
@@ -30,34 +39,44 @@ type NavItem = {
 };
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user: UserProfile;
+  user: User;
 }
 
 const items: NavItem[] = [
   {
-    title: "Home",
+    title: "Dashboard",
     url: "/home",
     icon: Home,
   },
   {
-    title: "Projects",
-    url: "/projects",
-    icon: Layers,
+    title: "Land Parcels",
+    url: "/parcels",
+    icon: Map,
   },
   {
-    title: "Action List",
-    url: "/action-list",
-    icon: ActionList,
+    title: "Biomass",
+    url: "/biomass",
+    icon: Sprout,
   },
   {
-    title: "Timeline",
-    url: "/timeline",
-    icon: Calendar,
+    title: "Production",
+    url: "/production",
+    icon: Factory,
   },
   {
-    title: "AI Copilot",
-    url: "/ai-copilot",
-    icon: AiCopilot,
+    title: "Storage",
+    url: "/storage",
+    icon: Warehouse,
+  },
+  {
+    title: "Reports",
+    url: "/reports",
+    icon: FileSpreadsheet,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
   },
 ];
 
@@ -68,19 +87,16 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="mt-5 flex-row gap-4">
-        <Image
-          src="/logo.png"
-          width={120}
-          height={40}
-          alt="GreenA Logo"
+        <span
           className={cn(
-            "transition-opacity duration-200",
+            "font-mono uppercase text-lg font-medium",
             state === "collapsed" && "hidden"
           )}
-          priority
-        />
+        >
+          Biochar dMRV
+        </span>
         <AlignJustify
-          className="size-7 rounded-sm bg-[#DCB07B] p-1 text-white max-md:hidden hover:bg-[#c49a6c] transition-colors"
+          className="size-7 rounded-sm bg-green-600 p-1 text-white max-md:hidden hover:bg-green-700 transition-colors"
           onClick={toggleSidebar}
         />
       </SidebarHeader>
@@ -98,13 +114,15 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                       asChild
                       className={cn(
                         "px-3 py-2 transition-colors",
-                        isActive && "bg-white/10 text-white"
+                        isActive && "bg-green-600/20 text-green-600"
                       )}
                       tooltip={item.title}
                       isActive={isActive}
                     >
                       <Link href={item.url}>
-                        <item.icon />
+                        <item.icon
+                          className={cn("mr-2", isActive && "text-green-600")}
+                        />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -116,13 +134,20 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        {state === "expanded" && (
-          <span className="text-center text-sm text-white/70">
-            Powered by sustAIn
-          </span>
-        )}
-      </SidebarFooter>
+      {user?.email && (
+        <SidebarFooter className="pb-4">
+          {state === "expanded" && (
+            <div className="flex flex-col items-center gap-2 px-4">
+              <div className="w-full rounded-lg bg-green-600/10 p-4">
+                <div className="text-sm font-medium text-green-600">
+                  {user.email}
+                </div>
+                <div className="text-xs text-green-600/70">Farmer Account</div>
+              </div>
+            </div>
+          )}
+        </SidebarFooter>
+      )}
 
       <SidebarRail />
     </Sidebar>

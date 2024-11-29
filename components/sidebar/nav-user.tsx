@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "./theme-switcher";
+import Link from "next/link";
 
 interface NavUserProps {
   user: User;
@@ -66,7 +67,7 @@ export function NavUser({ user }: NavUserProps) {
             <div className="flex flex-col md:items-start md:mr-2 max-md:hidden">
               <p className="text-sm font-medium capitalize">{name}</p>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span>User Account</span>
+                <span>Farmer Account</span>
               </div>
             </div>
             <ChevronDown className="size-4 ml-2 rounded-full bg-brand-primary/40 text-brand-primary" />
@@ -85,16 +86,22 @@ export function NavUser({ user }: NavUserProps) {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <CircleUserRound className="mr-2 size-4" />
-            <span>Profile</span>
+            <Link href="/profile" className="flex gap-1 items-center  w-full">
+              <CircleUserRound className="mr-2 size-4" />
+              <span>Profile</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Settings className="mr-2 size-4" />
-            <span>Settings</span>
+            <Link href="/settings" className="flex gap-1 items-center w-full">
+              <Settings className="mr-2 size-4" />
+              <span>Settings</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <CreditCard className="mr-2 size-4" />
-            <span>Billing</span>
+            <Link href="/billing" className="flex gap-1 items-center w-full">
+              <CreditCard className="mr-2 size-4" />
+              <span>Billing</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <ThemeSwitcher />

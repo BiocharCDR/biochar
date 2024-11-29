@@ -28,6 +28,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Dashboard | GreenA",
-  description: "GreenA dashboard and project management",
+  title: "Dashboard | Biochar dMRV",
+  description: "Dashboard for Biochar dMRV",
 };

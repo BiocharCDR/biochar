@@ -55,7 +55,7 @@ export function SignUp({ redirectTo }: { redirectTo: string }) {
       if (error) {
         toast.error(error.message);
       } else {
-        router.push("/verify-email");
+        router.push("/home");
       }
     });
   }
