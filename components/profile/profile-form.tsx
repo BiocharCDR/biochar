@@ -1,8 +1,11 @@
 "use client";
+
 // app/(main)/profile/components/profile-form.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,31 +25,24 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
 
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { toast } from "sonner";
+import {
+  ProfileFormProps,
+  ProfileFormValues,
+  profileFormSchema,
+} from "./schema";
 
-const profileFormSchema = z.object({
-  full_name: z.string().min(2, "Name must be at least 2 characters."),
-  email: z.string().email("Invalid email address."),
-  phone_number: z.string().optional(),
-  address: z.string().min(5, "Address must be at least 5 characters."),
-  land_ownership_status: z.boolean(),
-  num_of_cattle: z.number().min(0),
-  carbon_rights_agreement: z.boolean(),
-});
-
-export function ProfileForm({ initialData, user }) {
+export function ProfileForm({ initialData, user }: ProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createSupabaseBrowser();
 
-  const form = useForm({
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       full_name: initialData?.full_name || "",
       email: initialData?.email || user?.email || "",
-      phone_number: initialData?.phone_number || "",
+      phone_number: initialData?.phone_number || null,
       address: initialData?.address || "",
       land_ownership_status: initialData?.land_ownership_status || false,
       num_of_cattle: initialData?.num_of_cattle || 0,
@@ -54,7 +50,7 @@ export function ProfileForm({ initialData, user }) {
     },
   });
 
-  async function onSubmit(data) {
+  async function onSubmit(data: ProfileFormValues) {
     try {
       setIsLoading(true);
       const { error } = await supabase
@@ -64,9 +60,10 @@ export function ProfileForm({ initialData, user }) {
 
       if (error) throw error;
 
-      toast("Profile updated successfully.");
+      toast.success("Profile updated successfully.");
     } catch (error) {
-      toast("An error occurred. Please try again.", { type: "error" });
+      console.error("Error updating profile:", error);
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +117,11 @@ export function ProfileForm({ initialData, user }) {
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your phone number" {...field} />
+                      <Input
+                        placeholder="Your phone number"
+                        {...field}
+                        value={field.value || ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,6 +151,7 @@ export function ProfileForm({ initialData, user }) {
                     <FormControl>
                       <Input
                         type="number"
+                        min={0}
                         {...field}
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value))

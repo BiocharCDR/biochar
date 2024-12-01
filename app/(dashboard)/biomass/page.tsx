@@ -34,6 +34,7 @@ export default async function BiomassPage() {
       )
     `
     )
+    .eq("farmer_id", user.id)
     .order("created_at", { ascending: false });
 
   const typedRecords = biomassRecords as BiomassProductionWithParcelName[];

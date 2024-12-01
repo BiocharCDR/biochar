@@ -53,6 +53,7 @@ export default async function EditBiomassPage({
 
   const initialData = {
     parcel_id: biomass.parcel_id,
+    farmer_id: user.id,
     crop_type: biomass.crop_type,
     harvest_date: new Date(biomass.harvest_date),
     crop_yield: biomass.crop_yield,

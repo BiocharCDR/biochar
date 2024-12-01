@@ -17,7 +17,6 @@ export default function ProfileTabs({
   notifications,
   user,
 }: ProfileTabsProps) {
-  console.log(notifications);
   return (
     <Tabs defaultValue="general" className="w-full">
       <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">

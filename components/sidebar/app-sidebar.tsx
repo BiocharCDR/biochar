@@ -25,7 +25,7 @@ import {
   FileSpreadsheet,
   Settings,
   Map,
-  AlertCircle,
+  FlaskConical,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -59,8 +59,13 @@ const items: NavItem[] = [
     icon: Sprout,
   },
   {
-    title: "Production",
-    url: "/production",
+    title: "Fertilizers",
+    url: "/fertilizers",
+    icon: FlaskConical,
+  },
+  {
+    title: "Biochar",
+    url: "/biochar",
     icon: Factory,
   },
   {

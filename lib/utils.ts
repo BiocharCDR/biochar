@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { DBProject } from "./data/project";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,13 +9,6 @@ export function cn(...inputs: ClassValue[]) {
 export function getProjectStageNumber(stage: string): number {
   const stages = ["pre_design", "design", "construction", "verification"];
   return stages.indexOf(stage) + 1;
-}
-
-export function getProjectStatus(project: DBProject): string {
-  if (project.red_flag) return "At Risk";
-  if (project.progress === 100) return "Completed";
-  if (project.progress === 0) return "Not Started";
-  return "In Progress";
 }
 
 export function getStageColor(stage: string): string {
@@ -42,4 +34,20 @@ export function formatCurrency(value: number, currency: string): string {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(value);
+}
+
+export function formatDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+export function formatTime(timeString: string) {
+  const [hours, minutes] = timeString.split(":");
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? "pm" : "am";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
 }

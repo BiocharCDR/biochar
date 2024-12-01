@@ -89,10 +89,12 @@ export function BiomassForm({
     setIsSubmitting(true);
     try {
       let storage_proof_url = null;
+      const { data: user } = await supabase.auth.getUser();
 
       // Format the date to ISO string for Supabase
       const biomassData = {
         parcel_id: data.parcel_id,
+        farmer_id: user.user?.id,
         crop_type: data.crop_type,
         harvest_date: data.harvest_date.toISOString(), // Convert Date to string
         crop_yield: data.crop_yield,

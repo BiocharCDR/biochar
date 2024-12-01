@@ -41,6 +41,7 @@ import { BiomassFormValues, biomassFormSchema } from "./schema";
 interface BiomassEditFormProps {
   initialData: {
     id: string;
+    farmer_id: string;
     parcel_id: string;
     crop_type: string;
     harvest_date: Date;
@@ -117,11 +118,15 @@ export function BiomassEditForm({
         );
       }
 
+      const { data: user } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not found");
+
       // Update record
       const { error: updateError } = await supabase
         .from("biomass_production")
         .update({
           parcel_id: data.parcel_id,
+          farmer_id: user.user?.id,
           crop_type: data.crop_type,
           harvest_date: data.harvest_date.toISOString(),
           crop_yield: data.crop_yield,
