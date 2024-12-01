@@ -37,7 +37,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* Footer */}
       <div className="mt-8 text-center text-sm text-gray-500">
-        <p>© {new Date().getFullYear()} GreenA. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Biochar dMRV. All rights reserved.</p>
       </div>
     </div>
   );

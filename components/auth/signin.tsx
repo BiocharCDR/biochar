@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
@@ -70,15 +69,6 @@ export default function SignIn() {
 
   return (
     <div className="w-full max-w-md rounded-lg bg-white p-8">
-      <div className="mb-8">
-        <Image
-          src="/logo-2.png"
-          alt="GreenA"
-          className="mx-auto h-8 w-auto"
-          width={100}
-          height={100}
-        />
-      </div>
       <div className=" text-center">
         <h2 className="mb-2 text-2xl font-semibold text-gray-900">
           Log in to your account
