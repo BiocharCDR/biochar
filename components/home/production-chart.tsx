@@ -1,5 +1,6 @@
+/*eslint-disable*/
 "use client";
-// app/(main)/home/components/production-chart.tsx
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart,

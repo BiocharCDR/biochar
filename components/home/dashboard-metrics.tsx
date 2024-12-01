@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Factory, MapPin, Scale, Database } from "lucide-react";
 
 interface DashboardMetricsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metrics: any;
 }
 

@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 

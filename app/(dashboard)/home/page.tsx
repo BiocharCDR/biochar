@@ -62,7 +62,7 @@ export default async function HomePage() {
             Welcome back, {profile?.full_name}
           </h1>
           <p className="text-muted-foreground">
-            Here's what's happening with your biochar production
+            Here&apos;s what&apos;s happening with your biochar production
           </p>
         </div>
       </div>

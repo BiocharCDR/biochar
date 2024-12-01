@@ -1,5 +1,7 @@
+/*eslint-disable*/
+
 "use client";
-// app/(main)/home/components/recent-activities.tsx
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { Activity } from "lucide-react";

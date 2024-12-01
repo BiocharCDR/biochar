@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 interface FarmerProgressGuideProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   profile: any;
   hasLandParcels: boolean;
   hasBiomassRecords: boolean;

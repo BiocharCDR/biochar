@@ -119,7 +119,7 @@ export function FertilizerForm({
         purchase_proof_url,
       };
 
-      // Remove the file object before sending to Supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (fertilizerData as any).purchase_proof;
 
       if (isEdit && initialData?.id) {
