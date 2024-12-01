@@ -155,7 +155,7 @@ const LandingPage = () => {
                 Sign In
               </Button>
             </Link>
-            <Link href="/register">
+            <Link href="/signup">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -206,7 +206,7 @@ const LandingPage = () => {
               variants={fadeIn}
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
-              <Link href="/trial">
+              <Link href="/signin">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -219,7 +219,7 @@ const LandingPage = () => {
                   </Button>
                 </motion.div>
               </Link>
-              <Link href="/demo">
+              <Link href="/signup">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
