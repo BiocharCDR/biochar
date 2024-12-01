@@ -32,7 +32,6 @@ export default async function EditParcelPage({ params }: EditParcelPageProps) {
   if (error || !parcel) {
     notFound();
   }
-  console.log(parcel);
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">

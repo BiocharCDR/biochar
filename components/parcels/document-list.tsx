@@ -26,6 +26,7 @@ export function DocumentList({ documents }: DocumentListProps) {
     }
   };
 
+  console.log("Documents", documents);
   return (
     <div className="space-y-4">
       {documents.map((doc) => {

@@ -134,21 +134,6 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      {user?.email && (
-        <SidebarFooter className="pb-4">
-          {state === "expanded" && (
-            <div className="flex flex-col items-center gap-2 px-4">
-              <div className="w-full rounded-lg bg-green-600/10 p-4">
-                <div className="text-sm font-medium text-green-600">
-                  {user.email}
-                </div>
-                <div className="text-xs text-green-600/70">Farmer Account</div>
-              </div>
-            </div>
-          )}
-        </SidebarFooter>
-      )}
-
       <SidebarRail />
     </Sidebar>
   );
