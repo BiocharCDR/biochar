@@ -109,8 +109,7 @@ export default function AddParcelDialog() {
   ) {
     const fileExt = file.name.split(".").pop();
     const fileName = `${parcelId}/${documentType}.${fileExt}`;
-    console.log("Uploading document:", fileName);
-    console.log(file);
+
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from("parcel-documents")
       .upload(fileName, file);
@@ -126,7 +125,7 @@ export default function AddParcelDialog() {
 
   async function onSubmit(data: ParcelFormValues) {
     setIsUploading(true);
-    console.log("Submitting form:", data);
+
     try {
       const {
         data: { user },
@@ -160,8 +159,6 @@ export default function AddParcelDialog() {
         .single();
 
       if (parcelError) throw parcelError;
-
-      console.log("Parcel created:", parcel);
 
       // Upload documents and create document records
       const documents = [

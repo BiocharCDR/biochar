@@ -25,7 +25,6 @@ export default async function ProfilePage() {
     .order("created_at", { ascending: false })
     .limit(5);
 
-  console.log(notifications);
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>

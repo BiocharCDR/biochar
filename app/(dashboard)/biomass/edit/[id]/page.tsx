@@ -38,8 +38,6 @@ export default async function EditBiomassPage({
     notFound();
   }
 
-  console.log(biomass);
-
   // Fetch user's parcels for the form
   const { data: parcels, error: parcelsError } = await supabase
     .from("land_parcels")

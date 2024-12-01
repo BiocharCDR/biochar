@@ -84,8 +84,6 @@ export default async function ParcelDetailsPage({
     .select("*")
     .eq("parcel_id", params.id);
 
-  console.log(documents);
-
   if (error || !parcel) {
     notFound();
   }
