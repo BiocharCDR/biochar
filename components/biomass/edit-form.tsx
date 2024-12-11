@@ -37,34 +37,24 @@ import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { BiomassFormValues, biomassFormSchema } from "./schema";
+import { BiomassProduction } from "@/types";
 
-interface BiomassEditFormProps {
-  initialData: {
-    id: string;
-    farmer_id: string;
-    parcel_id: string;
-    crop_type: string;
-    harvest_date: Date;
-    crop_yield: number | null;
-    moisture_content: number | null;
-    quality_grade: string | null;
-    residue_generated: number | null;
-    residue_storage_location: string | null;
-    storage_conditions: string | null;
-    notes: string | null;
-    status: "stored" | "in_process" | "used";
-    storage_proof_url?: string | null;
-  };
-  parcels: {
-    id: string;
-    parcel_name: string;
-  }[];
+// Type for parcel data
+interface Parcel {
+  id: string;
+  parcel_name: string;
 }
 
-export function BiomassEditForm({
-  initialData,
+// Props interface for the BiomassEditForm component
+interface BiomassEditFormProps {
+  parcels: Parcel[];
+  initialData: BiomassProduction;
+}
+
+export const BiomassEditForm: React.FC<BiomassEditFormProps> = ({
   parcels,
-}: BiomassEditFormProps) {
+  initialData,
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const supabase = createSupabaseBrowser();
@@ -73,7 +63,15 @@ export function BiomassEditForm({
     resolver: zodResolver(biomassFormSchema),
     defaultValues: {
       ...initialData,
-      harvest_date: new Date(initialData.harvest_date), // Convert string to Date
+      harvest_date: new Date(initialData.harvest_date),
+      biomass_storage_date: initialData.biomass_storage_date
+        ? new Date(initialData.biomass_storage_date)
+        : null,
+      residue_storage_date: initialData.residue_storage_date
+        ? new Date(initialData.residue_storage_date)
+        : null,
+      status:
+        (initialData.status as "stored" | "in_process" | "used") || "stored",
     },
   });
 
@@ -97,23 +95,42 @@ export function BiomassEditForm({
   async function onSubmit(data: BiomassFormValues) {
     setIsSubmitting(true);
     try {
-      let storage_proof_url = initialData.storage_proof_url;
+      let biomass_storage_proof_url = initialData.biomass_storage_proof_url;
+      let residue_storage_proof_url = initialData.residue_storage_proof_url;
 
-      // Handle file upload if new file is provided
-      if (data.storage_proof) {
+      // Handle biomass storage proof upload if new file is provided
+      if (data.biomass_storage_proof) {
         // Delete old file if exists
-        if (initialData.storage_proof_url) {
-          const oldFileKey = initialData.storage_proof_url.split("/").pop();
+        if (initialData.biomass_storage_proof_url) {
+          const oldFileKey = initialData.biomass_storage_proof_url
+            .split("/")
+            .pop();
           if (oldFileKey) {
             await supabase.storage
               .from("biomass-documents")
               .remove([`${initialData.id}/${oldFileKey}`]);
           }
         }
+        biomass_storage_proof_url = await uploadStorageProof(
+          data.biomass_storage_proof,
+          initialData.id
+        );
+      }
 
-        // Upload new file
-        storage_proof_url = await uploadStorageProof(
-          data.storage_proof,
+      // Handle residue storage proof upload if new file is provided
+      if (data.residue_storage_proof) {
+        if (initialData.residue_storage_proof_url) {
+          const oldFileKey = initialData.residue_storage_proof_url
+            .split("/")
+            .pop();
+          if (oldFileKey) {
+            await supabase.storage
+              .from("biomass-documents")
+              .remove([`${initialData.id}/${oldFileKey}`]);
+          }
+        }
+        residue_storage_proof_url = await uploadStorageProof(
+          data.residue_storage_proof,
           initialData.id
         );
       }
@@ -121,7 +138,7 @@ export function BiomassEditForm({
       const { data: user } = await supabase.auth.getUser();
       if (!user) throw new Error("User not found");
 
-      // Update record
+      // Update record with all fields
       const { error: updateError } = await supabase
         .from("biomass_production")
         .update({
@@ -132,12 +149,22 @@ export function BiomassEditForm({
           crop_yield: data.crop_yield,
           moisture_content: data.moisture_content,
           quality_grade: data.quality_grade,
+          // Biomass Storage
+          biomass_quantity: data.biomass_quantity,
+          biomass_storage_location: data.biomass_storage_location,
+          biomass_storage_date:
+            data.biomass_storage_date?.toISOString() ?? null,
+          biomass_storage_conditions: data.biomass_storage_conditions,
+          biomass_storage_proof_url,
+          // Residue Storage
           residue_generated: data.residue_generated,
           residue_storage_location: data.residue_storage_location,
-          storage_conditions: data.storage_conditions,
+          residue_storage_date:
+            data.residue_storage_date?.toISOString() ?? null,
+          residue_storage_conditions: data.residue_storage_conditions,
+          residue_storage_proof_url,
           notes: data.notes,
           status: data.status,
-          storage_proof_url,
         })
         .eq("id", initialData.id);
 
@@ -397,16 +424,81 @@ export function BiomassEditForm({
           </CardContent>
         </Card>
 
-        {/* Storage Information */}
+        {/* Biomass Storage */}
         <Card>
           <CardHeader>
-            <CardTitle>Storage Information</CardTitle>
+            <CardTitle>Biomass Storage</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="residue_storage_location"
+                name="biomass_quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Biomass Quantity (tonnes)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Enter quantity"
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value ? parseFloat(value) : null);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="biomass_storage_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="biomass_storage_location"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Storage Location</FormLabel>
@@ -427,7 +519,7 @@ export function BiomassEditForm({
 
               <FormField
                 control={form.control}
-                name="storage_conditions"
+                name="biomass_storage_conditions"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Storage Conditions</FormLabel>
@@ -460,74 +552,186 @@ export function BiomassEditForm({
 
             <FormField
               control={form.control}
-              name="storage_proof"
+              name="biomass_storage_proof"
               render={({ field: { onChange, value, ...field } }) => (
                 <FormItem>
                   <FormLabel>Storage Proof</FormLabel>
                   <div className="space-y-2">
-                    {/* Show current file if exists */}
-                    {initialData.storage_proof_url && !value && (
+                    {initialData.biomass_storage_proof_url && !value && (
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50">
                           <FileText className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">Current Document</span>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                          className="h-9"
-                        >
+                        <Button type="button" variant="ghost" size="sm" asChild>
                           <a
-                            href={initialData.storage_proof_url}
+                            href={initialData.biomass_storage_proof_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1"
                           >
                             View
                           </a>
                         </Button>
                       </div>
                     )}
-
-                    {/* File input */}
                     <FormControl>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="file"
-                          accept="image/*,.pdf"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) onChange(file);
-                          }}
-                          {...field}
-                        />
-                        {value && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onChange(null)}
-                            className="h-9 px-2"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      <Input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) onChange(file);
+                        }}
+                        {...field}
+                      />
                     </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
 
-                    {/* Show selected file name */}
-                    {value && (
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{value.name}</span>
+        {/* Residue Storage */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Residue Storage</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="residue_storage_location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Location</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter storage location"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Where the biomass is stored
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="residue_storage_conditions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Conditions</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select conditions" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="dry">Dry Storage</SelectItem>
+                        <SelectItem value="cold">Cold Storage</SelectItem>
+                        <SelectItem value="ambient">Ambient</SelectItem>
+                        <SelectItem value="controlled">
+                          Climate Controlled
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Current storage conditions
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="residue_storage_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="residue_storage_proof"
+              render={({ field: { onChange, value, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Storage Proof</FormLabel>
+                  <div className="space-y-2">
+                    {initialData.residue_storage_proof_url && !value && (
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">Current Document</span>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" asChild>
+                          <a
+                            href={initialData.residue_storage_proof_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View
+                          </a>
+                        </Button>
                       </div>
                     )}
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) onChange(file);
+                        }}
+                        {...field}
+                      />
+                    </FormControl>
                   </div>
-                  <FormDescription>
-                    Upload photos or documents of storage (PDF or images only)
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -586,4 +790,4 @@ export function BiomassEditForm({
       </form>
     </Form>
   );
-}
+};

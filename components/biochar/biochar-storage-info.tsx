@@ -1,4 +1,4 @@
-// app/biochar/[id]/components/biochar-storage-info.tsx
+// components/biochar/biochar-storage-info.tsx
 import {
   Card,
   CardContent,
@@ -9,48 +9,59 @@ import {
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
 import { Tables } from "@/supabase/schema";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface BiocharStorageInfoProps {
-  storage: Tables<"biochar_storage">;
+  storage: Tables<"biochar_storage"> | null;
 }
 
 export default function BiocharStorageInfo({
   storage,
 }: BiocharStorageInfoProps) {
+  if (!storage) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Storage Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <InfoIcon className="h-4 w-4" />
+            <AlertTitle>No Storage Information</AlertTitle>
+            <AlertDescription>
+              Storage details haven't been recorded for this production batch
+              yet.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const storageData = [
-    {
-      label: "Storage Date",
-      value: formatDate(storage.storage_date),
-    },
     {
       label: "Storage Location",
       value: storage.storage_location,
     },
     {
+      label: "Storage Date",
+      value: formatDate(storage.storage_date),
+    },
+    {
       label: "Quantity Stored",
       value: `${storage.quantity_stored} kg`,
     },
-    {
-      label: "Mixed with Fertilizer",
-      value: storage.mixed_with_fertilizer ? "Yes" : "No",
-    },
-    {
-      label: "Organic Fertilizer Used",
-      value: storage.organic_fertilizer_used || "N/A",
-    },
+
     {
       label: "Storage Conditions",
-      value: storage.storage_conditions || "N/A",
+      value: storage.storage_conditions || "Not specified",
     },
     {
       label: "Quality Check Date",
       value: storage.quality_check_date
         ? formatDate(storage.quality_check_date)
-        : "N/A",
-    },
-    {
-      label: "Status",
-      value: storage.status || "N/A",
+        : "Not checked",
     },
   ];
 
@@ -73,14 +84,6 @@ export default function BiocharStorageInfo({
             ))}
           </TableBody>
         </Table>
-        {storage.quality_parameters && (
-          <div className="mt-4">
-            <h4 className="text-sm font-medium">Quality Parameters</h4>
-            <pre className="mt-1 rounded-md bg-secondary p-4 text-sm">
-              {JSON.stringify(storage.quality_parameters, null, 2)}
-            </pre>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

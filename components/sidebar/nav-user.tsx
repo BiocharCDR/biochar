@@ -17,10 +17,13 @@ import {
   CreditCard,
   LogOut,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "./theme-switcher";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { error } from "console";
 
 interface NavUserProps {
   user: User;
@@ -29,6 +32,7 @@ interface NavUserProps {
 export function NavUser({ user }: NavUserProps) {
   const router = useRouter();
   const supabase = createSupabaseBrowser();
+  const [role, setRole] = useState<string | null>();
 
   // Get user details from user_metadata
   const name =
@@ -38,6 +42,22 @@ export function NavUser({ user }: NavUserProps) {
     user.user_metadata?.avatar_url ||
     user.user_metadata?.picture ||
     `https://avatar.vercel.sh/${email}`;
+
+  useEffect(() => {
+    const fetchProfile = async (id: string) => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (data) {
+        setRole(data?.role);
+      }
+    };
+
+    fetchProfile(user.id);
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -67,7 +87,7 @@ export function NavUser({ user }: NavUserProps) {
             <div className="flex flex-col md:items-start md:mr-2 max-md:hidden">
               <p className="text-sm font-medium capitalize">{name}</p>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span>Farmer Account</span>
+                <span className="capitalize">{role} account</span>
               </div>
             </div>
             <ChevronDown className="size-4 ml-2 rounded-full bg-brand-primary/40 text-brand-primary" />
@@ -91,6 +111,14 @@ export function NavUser({ user }: NavUserProps) {
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
+          {role === "admin" && (
+            <DropdownMenuItem className="bg-primary/10 ">
+              <Link href="/admin" className="flex gap-1 items-center w-full">
+                <ShieldCheck className="mr-2 size-4" />
+                <span>Admin</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem>
             <Link href="/settings" className="flex gap-1 items-center w-full">
               <Settings className="mr-2 size-4" />

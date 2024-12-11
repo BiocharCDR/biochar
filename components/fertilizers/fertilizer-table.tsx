@@ -1,6 +1,5 @@
 "use client";
 
-// app/fertilisers/_components/fertilizer-table.tsx
 import { useState } from "react";
 import {
   ColumnDef,
@@ -98,9 +97,9 @@ const columns: ColumnDef<Fertilizer>[] = [
       return status ? (
         <Badge
           variant={
-            status === "active"
+            status === "in_stock"
               ? "default"
-              : status === "depleted"
+              : status === "out_of_stock"
               ? "destructive"
               : "secondary"
           }

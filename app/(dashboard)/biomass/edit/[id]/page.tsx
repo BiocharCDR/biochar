@@ -18,7 +18,6 @@ export default async function EditBiomassPage({
 }: EditBiomassPageProps) {
   const supabase = createSupabaseServer();
 
-  // Get the current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -27,7 +26,7 @@ export default async function EditBiomassPage({
     notFound();
   }
 
-  // Fetch the biomass record
+  // Fetch the biomass record with all fields
   const { data: biomass, error: biomassError } = await supabase
     .from("biomass_production")
     .select("*")
@@ -38,7 +37,7 @@ export default async function EditBiomassPage({
     notFound();
   }
 
-  // Fetch user's parcels for the form
+  // Fetch user's parcels
   const { data: parcels, error: parcelsError } = await supabase
     .from("land_parcels")
     .select("id, parcel_name")
@@ -48,23 +47,6 @@ export default async function EditBiomassPage({
   if (parcelsError) {
     console.error("Error fetching parcels:", parcelsError);
   }
-
-  const initialData = {
-    parcel_id: biomass.parcel_id,
-    farmer_id: user.id,
-    crop_type: biomass.crop_type,
-    harvest_date: new Date(biomass.harvest_date),
-    crop_yield: biomass.crop_yield,
-    moisture_content: biomass.moisture_content,
-    quality_grade: biomass.quality_grade,
-    residue_generated: biomass.residue_generated,
-    residue_storage_location: biomass.residue_storage_location,
-    storage_conditions: biomass.storage_conditions,
-    notes: biomass.notes,
-    status: biomass.status as "stored" | "in_process" | "used", // Type assertion
-    id: biomass.id,
-    storage_proof_url: biomass.storage_proof_url,
-  };
 
   return (
     <div className="container mx-auto py-10">
@@ -81,7 +63,7 @@ export default async function EditBiomassPage({
         </p>
       </div>
 
-      <BiomassEditForm parcels={parcels || []} initialData={initialData} />
+      <BiomassEditForm parcels={parcels || []} initialData={biomass} />
     </div>
   );
 }

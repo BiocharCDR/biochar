@@ -2,6 +2,7 @@
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BiomassProductionWithParcelName } from "./types";
+import { BiomassProduction } from "@/types";
 
 interface BiomassDetailsProps {
   data: BiomassProductionWithParcelName;
@@ -10,8 +11,16 @@ interface BiomassDetailsProps {
 export function BiomassDetails({ data }: BiomassDetailsProps) {
   const details = [
     {
-      label: "Parcel",
+      label: "Parcel Name",
       value: data.land_parcels?.parcel_name,
+    },
+    {
+      label: "Total Area",
+      value: `${data.land_parcels?.total_area || 0} ha`,
+    },
+    {
+      label: "Cultivable Area",
+      value: `${data.land_parcels?.cultivable_area || 0} ha`,
     },
     {
       label: "Crop Type",
@@ -20,10 +29,6 @@ export function BiomassDetails({ data }: BiomassDetailsProps) {
     {
       label: "Harvest Date",
       value: format(new Date(data.harvest_date), "PPP"),
-    },
-    {
-      label: "Crop Yield",
-      value: `${data.crop_yield?.toFixed(2) || "0"} tonnes`,
     },
     {
       label: "Moisture Content",
@@ -35,12 +40,16 @@ export function BiomassDetails({ data }: BiomassDetailsProps) {
       label: "Quality Grade",
       value: data.quality_grade || "Not graded",
     },
+    {
+      label: "Status",
+      value: data.status || "Not specified",
+    },
   ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Basic Information</CardTitle>
+        <CardTitle>Crop Information</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4">

@@ -39,6 +39,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BiomassFormProps,
   BiomassFormValues,
+  STORAGE_CONDITIONS,
   biomassFormSchema,
 } from "./schema";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
@@ -47,9 +48,16 @@ const defaultValues: Partial<BiomassFormValues> = {
   crop_yield: null,
   moisture_content: null,
   quality_grade: null,
+  // Biomass Storage
+  biomass_storage_location: null,
+  biomass_storage_date: null,
+  biomass_storage_conditions: null,
+  biomass_quantity: null,
+  // Residue Storage
   residue_generated: null,
   residue_storage_location: null,
-  storage_conditions: null,
+  residue_storage_date: null,
+  residue_storage_conditions: null,
   notes: null,
   status: "stored",
 };
@@ -68,9 +76,13 @@ export function BiomassForm({
     defaultValues: initialData || defaultValues,
   });
 
-  async function uploadStorageProof(file: File, biomassId: string) {
+  async function uploadProof(
+    file: File,
+    biomassId: string,
+    type: "biomass" | "residue"
+  ) {
     const fileExt = file.name.split(".").pop();
-    const fileName = `${biomassId}/storage_proof.${fileExt}`;
+    const fileName = `${biomassId}/${type}_storage_proof.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("biomass-documents")
@@ -91,18 +103,31 @@ export function BiomassForm({
       let storage_proof_url = null;
       const { data: user } = await supabase.auth.getUser();
 
+      if (!user.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
       // Format the date to ISO string for Supabase
       const biomassData = {
         parcel_id: data.parcel_id,
-        farmer_id: user.user?.id,
+        farmer_id: user.user.id,
         crop_type: data.crop_type,
-        harvest_date: data.harvest_date.toISOString(), // Convert Date to string
+        harvest_date: data.harvest_date.toISOString().split("T")[0],
         crop_yield: data.crop_yield,
         moisture_content: data.moisture_content,
         quality_grade: data.quality_grade,
+        // Biomass Storage
+        biomass_storage_location: data.biomass_storage_location,
+        biomass_storage_date:
+          data.biomass_storage_date?.toISOString().split("T")[0] ?? null,
+        biomass_storage_conditions: data.biomass_storage_conditions,
+        biomass_quantity: data.biomass_quantity,
+        // Residue Storage
         residue_generated: data.residue_generated,
         residue_storage_location: data.residue_storage_location,
-        storage_conditions: data.storage_conditions,
+        residue_storage_date:
+          data.residue_storage_date?.toISOString().split("T")[0] ?? null,
+        residue_storage_conditions: data.residue_storage_conditions,
         notes: data.notes,
         status: data.status,
       };
@@ -116,18 +141,31 @@ export function BiomassForm({
       if (insertError) throw insertError;
 
       // Handle storage proof upload if provided
-      if (data.storage_proof) {
-        storage_proof_url = await uploadStorageProof(
-          data.storage_proof,
-          biomassRecord.id
+      if (data.biomass_storage_proof) {
+        const biomass_storage_proof_url = await uploadProof(
+          data.biomass_storage_proof,
+          biomassRecord.id,
+          "biomass"
         );
 
-        const { error: updateError } = await supabase
+        await supabase
           .from("biomass_production")
-          .update({ storage_proof_url })
+          .update({ biomass_storage_proof_url })
           .eq("id", biomassRecord.id);
+      }
 
-        if (updateError) throw updateError;
+      // Handle residue storage proof upload
+      if (data.residue_storage_proof) {
+        const residue_storage_proof_url = await uploadProof(
+          data.residue_storage_proof,
+          biomassRecord.id,
+          "residue"
+        );
+
+        await supabase
+          .from("biomass_production")
+          .update({ residue_storage_proof_url })
+          .eq("id", biomassRecord.id);
       }
 
       toast.success("Biomass record created successfully");
@@ -223,7 +261,7 @@ export function BiomassForm({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={field.value ?? undefined}
                           onSelect={field.onChange}
                           disabled={(date) =>
                             date > new Date() || date < new Date("1900-01-01")
@@ -386,17 +424,79 @@ export function BiomassForm({
           </CardContent>
         </Card>
 
-        {/* Storage Information */}
+        {/* Biomass Storage */}
         <Card>
           <CardHeader>
-            <CardTitle>Storage Information</CardTitle>
+            <CardTitle>Biomass Storage</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Residue STorage Location */}
               <FormField
                 control={form.control}
-                name="residue_storage_location"
+                name="biomass_quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Biomass Quantity (tonnes)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Enter quantity"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="biomass_storage_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="biomass_storage_location"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Storage Location</FormLabel>
@@ -407,18 +507,14 @@ export function BiomassForm({
                         value={field.value || ""}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Where the biomass is stored
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Storage Conditions */}
               <FormField
                 control={form.control}
-                name="storage_conditions"
+                name="biomass_storage_conditions"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Storage Conditions</FormLabel>
@@ -432,27 +528,25 @@ export function BiomassForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="dry">Dry Storage</SelectItem>
-                        <SelectItem value="cold">Cold Storage</SelectItem>
-                        <SelectItem value="ambient">Ambient</SelectItem>
-                        <SelectItem value="controlled">
-                          Climate Controlled
-                        </SelectItem>
+                        {STORAGE_CONDITIONS.map((condition) => (
+                          <SelectItem
+                            key={condition.value}
+                            value={condition.value}
+                          >
+                            {condition.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Current storage conditions
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Storage Proof */}
             <FormField
               control={form.control}
-              name="storage_proof"
+              name="biomass_storage_proof"
               render={({ field: { onChange, value, ...field } }) => (
                 <FormItem>
                   <FormLabel>Storage Proof</FormLabel>
@@ -468,7 +562,155 @@ export function BiomassForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload photos or documents of storage (PDF or images only)
+                    Upload proof of biomass storage (PDF or images only)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Residue Storage */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Residue Storage</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-6">
+            {/* Similar structure as Biomass Storage but with residue fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="residue_generated"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Residue Generated (tonnes)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Enter residue amount"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="residue_storage_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="residue_storage_location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Location</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter storage location"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="residue_storage_conditions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Storage Conditions</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select conditions" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {STORAGE_CONDITIONS.map((condition) => (
+                          <SelectItem
+                            key={condition.value}
+                            value={condition.value}
+                          >
+                            {condition.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="residue_storage_proof"
+              render={({ field: { onChange, value, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Storage Proof</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) onChange(file);
+                      }}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload proof of residue storage (PDF or images only)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

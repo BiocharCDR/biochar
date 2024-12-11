@@ -1,13 +1,14 @@
-import { notFound } from "next/navigation";
-import { createSupabaseServer } from "@/lib/supabase/server";
 import { BiomassDetails } from "@/components/biomass/biomass-details";
 import { BiomassSummary } from "@/components/biomass/biomass-summary";
+import { BiomassUsage } from "@/components/biomass/biomass-usage";
 import { StorageDetails } from "@/components/biomass/storage-details";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-interface BiomassDetailsPageProps {
+export interface BiomassDetailsPageProps {
   params: {
     id: string;
   };
@@ -35,6 +36,32 @@ export default async function BiomassDetailsPage({
     .eq("id", params.id)
     .single();
 
+  // Fetch Biomass Usage Records
+  const { data: biomassUsage, error: usageError } = await supabase
+    .from("biomass_usage")
+    .select(
+      `
+      id,
+      biomass_id,
+      quantity_used,
+      usage_date,
+      created_at,
+      updated_at,
+      biochar_production (
+        id,
+        batch_number,
+        biochar_weight,
+        biomass_weight,
+        combustion_temperature,
+        end_time,
+        production_date,
+        start_time,
+        yield_percentage
+      )
+    `
+    )
+    .eq("biomass_id", params.id);
+
   if (error || !biomass) {
     notFound();
   }
@@ -42,7 +69,6 @@ export default async function BiomassDetailsPage({
   return (
     <div className="container mx-auto py-10">
       <div className="mb-6">
-        {/* <BackButton /> */}
         <Button variant="ghost" size="sm" className="mb-4" asChild>
           <Link href="/biomass" className="flex items-center">
             <ChevronLeft className="h-4 w-4 mr-2" />
@@ -62,12 +88,19 @@ export default async function BiomassDetailsPage({
         <BiomassSummary data={biomass} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Basic Information */}
-        <BiomassDetails data={biomass} />
+      <div className="grid gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Basic Information */}
+          <BiomassDetails data={biomass} />
 
-        {/* Storage Information */}
-        <StorageDetails data={biomass} />
+          {/* Storage Information */}
+          <StorageDetails data={biomass} />
+        </div>
+
+        {/* Usage History - Full Width */}
+        <div className="col-span-full">
+          <BiomassUsage data={biomassUsage || []} />
+        </div>
       </div>
     </div>
   );

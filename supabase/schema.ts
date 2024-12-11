@@ -56,8 +56,10 @@ export type Database = {
           application_method: string | null
           area_covered: number | null
           created_at: string
+          fertilizer_id: string | null
+          fertilizer_quantity: number | null
           id: string
-          mixed_with: string | null
+          mixture_ratio: string | null
           notes: string | null
           parcel_id: string
           quantity_used: number
@@ -71,8 +73,10 @@ export type Database = {
           application_method?: string | null
           area_covered?: number | null
           created_at?: string
+          fertilizer_id?: string | null
+          fertilizer_quantity?: number | null
           id?: string
-          mixed_with?: string | null
+          mixture_ratio?: string | null
           notes?: string | null
           parcel_id: string
           quantity_used: number
@@ -86,8 +90,10 @@ export type Database = {
           application_method?: string | null
           area_covered?: number | null
           created_at?: string
+          fertilizer_id?: string | null
+          fertilizer_quantity?: number | null
           id?: string
-          mixed_with?: string | null
+          mixture_ratio?: string | null
           notes?: string | null
           parcel_id?: string
           quantity_used?: number
@@ -97,6 +103,13 @@ export type Database = {
           weather_conditions?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "biochar_application_fertilizer_id_fkey"
+            columns: ["fertilizer_id"]
+            isOneToOne: false
+            referencedRelation: "fertilizer_inventory"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "biochar_application_parcel_id_fkey"
             columns: ["parcel_id"]
@@ -192,11 +205,11 @@ export type Database = {
         Row: {
           biochar_id: string
           created_at: string
+          farmer_id: string
           id: string
-          mixed_with_fertilizer: boolean | null
-          organic_fertilizer_used: string | null
           quality_check_date: string | null
           quality_parameters: Json | null
+          quantity_remaining: number
           quantity_stored: number
           status: string | null
           storage_conditions: string | null
@@ -207,11 +220,11 @@ export type Database = {
         Insert: {
           biochar_id: string
           created_at?: string
+          farmer_id: string
           id?: string
-          mixed_with_fertilizer?: boolean | null
-          organic_fertilizer_used?: string | null
           quality_check_date?: string | null
           quality_parameters?: Json | null
+          quantity_remaining: number
           quantity_stored: number
           status?: string | null
           storage_conditions?: string | null
@@ -222,11 +235,11 @@ export type Database = {
         Update: {
           biochar_id?: string
           created_at?: string
+          farmer_id?: string
           id?: string
-          mixed_with_fertilizer?: boolean | null
-          organic_fertilizer_used?: string | null
           quality_check_date?: string | null
           quality_parameters?: Json | null
+          quantity_remaining?: number
           quantity_stored?: number
           status?: string | null
           storage_conditions?: string | null
@@ -238,17 +251,32 @@ export type Database = {
           {
             foreignKeyName: "biochar_storage_biochar_id_fkey"
             columns: ["biochar_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "biochar_production"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "biochar_storage_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
       }
       biomass_production: {
         Row: {
+          biomass_quantity: number | null
+          biomass_remaining: number | null
+          biomass_storage_conditions: string | null
+          biomass_storage_date: string | null
+          biomass_storage_location: string | null
+          biomass_storage_proof_url: string | null
+          biomass_used: number | null
           created_at: string
           crop_type: string
           crop_yield: number | null
+          farmer_id: string
           harvest_date: string
           id: string
           moisture_content: number | null
@@ -256,16 +284,27 @@ export type Database = {
           parcel_id: string
           quality_grade: string | null
           residue_generated: number | null
+          residue_remaining: number | null
+          residue_storage_conditions: string | null
+          residue_storage_date: string | null
           residue_storage_location: string | null
+          residue_storage_proof_url: string | null
+          residue_used: number | null
           status: string | null
-          storage_conditions: string | null
-          storage_proof_url: string | null
           updated_at: string
         }
         Insert: {
+          biomass_quantity?: number | null
+          biomass_remaining?: number | null
+          biomass_storage_conditions?: string | null
+          biomass_storage_date?: string | null
+          biomass_storage_location?: string | null
+          biomass_storage_proof_url?: string | null
+          biomass_used?: number | null
           created_at?: string
           crop_type: string
           crop_yield?: number | null
+          farmer_id: string
           harvest_date: string
           id?: string
           moisture_content?: number | null
@@ -273,16 +312,27 @@ export type Database = {
           parcel_id: string
           quality_grade?: string | null
           residue_generated?: number | null
+          residue_remaining?: number | null
+          residue_storage_conditions?: string | null
+          residue_storage_date?: string | null
           residue_storage_location?: string | null
+          residue_storage_proof_url?: string | null
+          residue_used?: number | null
           status?: string | null
-          storage_conditions?: string | null
-          storage_proof_url?: string | null
           updated_at?: string
         }
         Update: {
+          biomass_quantity?: number | null
+          biomass_remaining?: number | null
+          biomass_storage_conditions?: string | null
+          biomass_storage_date?: string | null
+          biomass_storage_location?: string | null
+          biomass_storage_proof_url?: string | null
+          biomass_used?: number | null
           created_at?: string
           crop_type?: string
           crop_yield?: number | null
+          farmer_id?: string
           harvest_date?: string
           id?: string
           moisture_content?: number | null
@@ -290,18 +340,73 @@ export type Database = {
           parcel_id?: string
           quality_grade?: string | null
           residue_generated?: number | null
+          residue_remaining?: number | null
+          residue_storage_conditions?: string | null
+          residue_storage_date?: string | null
           residue_storage_location?: string | null
+          residue_storage_proof_url?: string | null
+          residue_used?: number | null
           status?: string | null
-          storage_conditions?: string | null
-          storage_proof_url?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "biomass_production_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "biomass_production_parcel_id_fkey"
             columns: ["parcel_id"]
             isOneToOne: false
             referencedRelation: "land_parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      biomass_usage: {
+        Row: {
+          biochar_id: string
+          biomass_id: string
+          created_at: string | null
+          id: string
+          quantity_used: number
+          updated_at: string | null
+          usage_date: string
+        }
+        Insert: {
+          biochar_id: string
+          biomass_id: string
+          created_at?: string | null
+          id?: string
+          quantity_used: number
+          updated_at?: string | null
+          usage_date: string
+        }
+        Update: {
+          biochar_id?: string
+          biomass_id?: string
+          created_at?: string | null
+          id?: string
+          quantity_used?: number
+          updated_at?: string | null
+          usage_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biomass_usage_biochar_id_fkey"
+            columns: ["biochar_id"]
+            isOneToOne: false
+            referencedRelation: "biochar_production"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "biomass_usage_biomass_id_fkey"
+            columns: ["biomass_id"]
+            isOneToOne: false
+            referencedRelation: "biomass_production"
             referencedColumns: ["id"]
           },
         ]
@@ -639,7 +744,7 @@ export type Database = {
           carbon_rights_agreement: boolean | null
           created_at: string
           email: string | null
-          full_name: string
+          full_name: string | null
           id: string
           land_ownership_status: boolean | null
           num_of_cattle: number | null
@@ -654,7 +759,7 @@ export type Database = {
           carbon_rights_agreement?: boolean | null
           created_at?: string
           email?: string | null
-          full_name: string
+          full_name?: string | null
           id: string
           land_ownership_status?: boolean | null
           num_of_cattle?: number | null
@@ -669,7 +774,7 @@ export type Database = {
           carbon_rights_agreement?: boolean | null
           created_at?: string
           email?: string | null
-          full_name?: string
+          full_name?: string | null
           id?: string
           land_ownership_status?: boolean | null
           num_of_cattle?: number | null
@@ -693,7 +798,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_available_biochar_batches: {
+        Args: {
+          p_farmer_id: string
+        }
+        Returns: {
+          id: string
+          batch_number: string
+          biochar_weight: number
+          production_date: string
+          biomass_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

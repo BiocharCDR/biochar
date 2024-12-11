@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,7 @@ export function BiocharForm({
   isEdit = false,
 }: BiocharFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBiomass, setSelectedBiomass] = useState<any>(null);
   const router = useRouter();
   const supabase = createSupabaseBrowser();
 
@@ -102,6 +103,16 @@ export function BiocharForm({
         return;
       }
 
+      // Check biomass availability for new records
+      if (
+        !isEdit &&
+        selectedBiomass &&
+        data.biomass_weight > selectedBiomass.biomass_remaining
+      ) {
+        toast.error("Requested biomass weight exceeds available quantity");
+        return;
+      }
+
       const biocharData = {
         ...data,
         farmer_id: user.id,
@@ -110,10 +121,12 @@ export function BiocharForm({
 
       if (isEdit && initialData) {
         // Update existing record
-        const { error: updateError } = await supabase
+        const { error: updateError, data: updatedBiochar } = await supabase
           .from("biochar_production")
           .update(biocharData)
-          .eq("id", initialData.id);
+          .eq("id", initialData.id)
+          .select()
+          .single();
 
         if (updateError) throw updateError;
 
@@ -121,11 +134,20 @@ export function BiocharForm({
         router.push(`/biochar/${initialData.id}`);
       } else {
         // Create new record
-        const { error: insertError } = await supabase
+        const { error: insertError, data: newBiochar } = await supabase
           .from("biochar_production")
-          .insert(biocharData);
+          .insert(biocharData)
+          .select()
+          .single();
 
         if (insertError) throw insertError;
+
+        // Record biomass usage for new records
+        await handleBiomassUsage(
+          newBiochar.id,
+          data.biomass_id,
+          data.biomass_weight
+        );
 
         toast.success("Production record created successfully");
         router.push("/biochar");
@@ -147,7 +169,30 @@ export function BiocharForm({
   const biocharWeight = form.watch("biochar_weight");
 
   // Calculate yield percentage when weights change
-  React.useEffect(() => {
+  useEffect(() => {
+    const currentBiomassId = form.getValues("biomass_id");
+    if (currentBiomassId) {
+      const biomass = biomassRecords.find((r) => r.id === currentBiomassId);
+      setSelectedBiomass(biomass);
+    }
+  }, [form, biomassRecords]);
+
+  const handleBiomassUsage = async (
+    biocharId: string,
+    biomassId: string,
+    quantityUsed: number
+  ) => {
+    const { error } = await supabase.from("biomass_usage").insert({
+      biochar_id: biocharId,
+      biomass_id: biomassId,
+      quantity_used: quantityUsed,
+      usage_date: new Date().toISOString().split("T")[0],
+    });
+
+    if (error) throw error;
+  };
+
+  useEffect(() => {
     if (biomassWeight && biocharWeight) {
       const yieldPercentage = (biocharWeight / biomassWeight) * 100;
       form.setValue("yield_percentage", yieldPercentage);
@@ -171,8 +216,15 @@ export function BiocharForm({
                   <FormItem>
                     <FormLabel>Biomass Source</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const biomass = biomassRecords.find(
+                          (r) => r.id === value
+                        );
+                        setSelectedBiomass(biomass);
+                      }}
                       defaultValue={field.value}
+                      disabled={isEdit}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -181,15 +233,26 @@ export function BiocharForm({
                       </FormControl>
                       <SelectContent>
                         {biomassRecords.map((record) => (
-                          <SelectItem key={record.id} value={record.id}>
-                            {`${record.crop_type} (${format(
-                              new Date(record.harvest_date),
-                              "PP"
-                            )})`}
+                          <SelectItem
+                            key={record.id}
+                            value={record.id!}
+                            disabled={!isEdit && record.biomass_remaining! <= 0}
+                          >
+                            {record.displayName ||
+                              `${record.crop_type} (${format(
+                                new Date(record.harvest_date!),
+                                "PP"
+                              )})`}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedBiomass && !isEdit && (
+                      <FormDescription>
+                        Available:{" "}
+                        {selectedBiomass.biomass_remaining.toFixed(2)} kg
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -307,11 +370,29 @@ export function BiocharForm({
                         placeholder="Enter weight"
                         {...field}
                         value={field.value ?? ""}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          if (
+                            !isEdit &&
+                            selectedBiomass &&
+                            value > selectedBiomass.biomass_remaining
+                          ) {
+                            toast.error("Weight exceeds available biomass");
+                            return;
+                          }
+                          field.onChange(value);
+                        }}
+                        disabled={isEdit}
                       />
                     </FormControl>
                     <FormDescription>
                       Total weight of biomass used
+                      {!isEdit && selectedBiomass && (
+                        <span className="block text-xs text-muted-foreground">
+                          Maximum available:{" "}
+                          {selectedBiomass.biomass_remaining.toFixed(2)} kg
+                        </span>
+                      )}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

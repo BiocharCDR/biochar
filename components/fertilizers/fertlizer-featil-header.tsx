@@ -47,7 +47,7 @@ export default function FertilizerDetailHeader({
         </p>
       </div>
       <div className="flex items-center space-x-2">
-        <Link href={`/fertilizers/${fertilizer.id}/usage/new`}>
+        <Link href={`/fertilizers/${fertilizer.id}/usage`}>
           <Button variant="secondary" size="sm">
             <Plus className="mr-2 h-4 w-4" />
             Record Usage

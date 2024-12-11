@@ -60,12 +60,16 @@ export const biocharFormSchema = z.object({
 export type BiocharFormValues = z.infer<typeof biocharFormSchema>;
 
 export interface BiomassRecord {
-  id: string;
-  crop_type: string;
-  harvest_date: string;
-  crop_yield: number | null;
-  residue_generated: number | null;
-  residue_storage_location: string | null;
+  id: string | null;
+  crop_type: string | null;
+  harvest_date: string | null;
+  biomass_quantity: number | null;
+  biomass_used: number | null;
+  biomass_remaining: number | null;
+  status: string | null;
+  land_parcels: { parcel_name: string | null }[] | null;
+  displayName: string | null;
+  harvestDate: Date | null;
 }
 
 export interface BiocharFormProps {

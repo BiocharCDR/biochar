@@ -94,4 +94,8 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  [data-scrollbar] {
+    -webkit-overflow-scrolling: touch;
+  }
 }
