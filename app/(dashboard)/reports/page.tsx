@@ -74,8 +74,6 @@ export default async function ReportsPage() {
     .eq("farmer_id", user.id)
     .order("created_at", { ascending: false });
 
-  console.log(fertilizerData);
-
   // Calculate summary metrics
   const summaryMetrics = {
     biomass: {
@@ -130,6 +128,7 @@ export default async function ReportsPage() {
           View your production and inventory metrics
         </p>
       </div>
+
       <Separator />
 
       {/* Overview Metrics */}

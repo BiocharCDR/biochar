@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { format } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 
