@@ -72,7 +72,9 @@ export default async function HomePage() {
             Welcome back, {profile?.full_name}
           </h1>
         </div>
-        <p className="text-muted-foreground">Here's your production overview</p>
+        <p className="text-muted-foreground">
+          Here&apos;s your production overview
+        </p>
       </div>
 
       {/* Main Grid Layout */}
