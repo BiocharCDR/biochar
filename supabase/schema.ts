@@ -50,6 +50,81 @@ export type Database = {
           },
         ]
       }
+      batch_carbon_metrics: {
+        Row: {
+          actual_cdr: number | null
+          biochar_batch_id: string | null
+          biochar_carbon_content: number | null
+          biomass_carbon_content: number | null
+          biomass_transport_emissions: number | null
+          carbon_footprint_per_kg: number | null
+          carbon_stability_factor: number | null
+          cdr_per_kg: number | null
+          created_at: string | null
+          energy_emissions: number | null
+          farmer_id: string | null
+          id: string
+          potential_cdr: number | null
+          production_emissions: number | null
+          total_carbon_footprint: number | null
+          updated_at: string | null
+          water_emissions: number | null
+        }
+        Insert: {
+          actual_cdr?: number | null
+          biochar_batch_id?: string | null
+          biochar_carbon_content?: number | null
+          biomass_carbon_content?: number | null
+          biomass_transport_emissions?: number | null
+          carbon_footprint_per_kg?: number | null
+          carbon_stability_factor?: number | null
+          cdr_per_kg?: number | null
+          created_at?: string | null
+          energy_emissions?: number | null
+          farmer_id?: string | null
+          id?: string
+          potential_cdr?: number | null
+          production_emissions?: number | null
+          total_carbon_footprint?: number | null
+          updated_at?: string | null
+          water_emissions?: number | null
+        }
+        Update: {
+          actual_cdr?: number | null
+          biochar_batch_id?: string | null
+          biochar_carbon_content?: number | null
+          biomass_carbon_content?: number | null
+          biomass_transport_emissions?: number | null
+          carbon_footprint_per_kg?: number | null
+          carbon_stability_factor?: number | null
+          cdr_per_kg?: number | null
+          created_at?: string | null
+          energy_emissions?: number | null
+          farmer_id?: string | null
+          id?: string
+          potential_cdr?: number | null
+          production_emissions?: number | null
+          total_carbon_footprint?: number | null
+          updated_at?: string | null
+          water_emissions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_carbon_metrics_biochar_batch_id_fkey"
+            columns: ["biochar_batch_id"]
+            isOneToOne: true
+            referencedRelation: "biochar_production"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_carbon_metrics_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       biochar_application: {
         Row: {
           application_date: string
@@ -411,6 +486,68 @@ export type Database = {
           },
         ]
       }
+      carbon_footprint: {
+        Row: {
+          application_emissions: number | null
+          biochar_stable_carbon: number | null
+          biomass_sequestered_co2: number | null
+          biomass_transport_emissions: number | null
+          created_at: string | null
+          farmer_id: string | null
+          fertilizer_reduction_benefit: number | null
+          id: string
+          month: string
+          net_carbon_impact: number | null
+          production_emissions: number | null
+          total_emissions: number | null
+          total_sequestered: number | null
+          updated_at: string | null
+          water_usage_emissions: number | null
+        }
+        Insert: {
+          application_emissions?: number | null
+          biochar_stable_carbon?: number | null
+          biomass_sequestered_co2?: number | null
+          biomass_transport_emissions?: number | null
+          created_at?: string | null
+          farmer_id?: string | null
+          fertilizer_reduction_benefit?: number | null
+          id?: string
+          month: string
+          net_carbon_impact?: number | null
+          production_emissions?: number | null
+          total_emissions?: number | null
+          total_sequestered?: number | null
+          updated_at?: string | null
+          water_usage_emissions?: number | null
+        }
+        Update: {
+          application_emissions?: number | null
+          biochar_stable_carbon?: number | null
+          biomass_sequestered_co2?: number | null
+          biomass_transport_emissions?: number | null
+          created_at?: string | null
+          farmer_id?: string | null
+          fertilizer_reduction_benefit?: number | null
+          id?: string
+          month?: string
+          net_carbon_impact?: number | null
+          production_emissions?: number | null
+          total_emissions?: number | null
+          total_sequestered?: number | null
+          updated_at?: string | null
+          water_usage_emissions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carbon_footprint_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fertilizer_inventory: {
         Row: {
           batch_number: string | null
@@ -692,7 +829,12 @@ export type Database = {
       }
       production_metrics: {
         Row: {
+          active_parcels: number | null
           average_yield_percentage: number | null
+          biochar_remaining: number | null
+          biochar_used: number | null
+          biomass_remaining: number | null
+          biomass_used: number | null
           created_at: string
           farmer_id: string
           id: string
@@ -704,7 +846,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_parcels?: number | null
           average_yield_percentage?: number | null
+          biochar_remaining?: number | null
+          biochar_used?: number | null
+          biomass_remaining?: number | null
+          biomass_used?: number | null
           created_at?: string
           farmer_id: string
           id?: string
@@ -716,7 +863,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_parcels?: number | null
           average_yield_percentage?: number | null
+          biochar_remaining?: number | null
+          biochar_used?: number | null
+          biomass_remaining?: number | null
+          biomass_used?: number | null
           created_at?: string
           farmer_id?: string
           id?: string
@@ -798,6 +950,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_batch_carbon_metrics: {
+        Args: {
+          batch_id: string
+        }
+        Returns: undefined
+      }
+      calculate_carbon_footprint: {
+        Args: {
+          p_farmer_id: string
+          p_month: string
+        }
+        Returns: undefined
+      }
       get_available_biochar_batches: {
         Args: {
           p_farmer_id: string

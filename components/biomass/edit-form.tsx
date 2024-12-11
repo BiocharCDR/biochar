@@ -151,6 +151,7 @@ export const BiomassEditForm: React.FC<BiomassEditFormProps> = ({
           quality_grade: data.quality_grade,
           // Biomass Storage
           biomass_quantity: data.biomass_quantity,
+          biomass_remaining: data.biomass_quantity,
           biomass_storage_location: data.biomass_storage_location,
           biomass_storage_date:
             data.biomass_storage_date?.toISOString() ?? null,

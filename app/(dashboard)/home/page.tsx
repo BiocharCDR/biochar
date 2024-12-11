@@ -1,46 +1,42 @@
 // app/home/page.tsx
-import DashboardMetrics from "@/components/home/dashboard-metrics";
-import ProductionChart from "@/components/home/production-chart";
-import QuickActions from "@/components/home/quick-actions";
+import { Suspense } from "react";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bell } from "lucide-react";
-import FarmerProgressGuide from "@/components/home/farmer-progress-guide";
+import { Bell, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+import ProductionChart from "@/components/home/production-chart";
+
+import DashboardMetrics from "@/components/home/dashboard-metrics";
+import QuickActions from "@/components/home/quick-actions";
+import StockStatus from "@/components/home/stock-status";
 
 export default async function HomePage() {
   const supabase = createSupabaseServer();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) redirect("/signin");
 
   // Fetch all required data
   const [
     { data: profile },
     { data: metrics },
-    { data: activities },
     { data: notifications },
     { data: landParcels },
     { data: biomassRecords },
     { data: biocharRecords },
-    { data: fertilizerRecords },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
       .from("production_metrics")
       .select("*")
       .eq("farmer_id", user.id)
-      .order("created_at", { ascending: false })
+      .order("month", { ascending: false })
       .limit(1)
       .single(),
-    supabase
-      .from("activity_logs")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5),
     supabase
       .from("notifications")
       .select("*")
@@ -50,64 +46,69 @@ export default async function HomePage() {
       .limit(5),
     supabase.from("land_parcels").select("*").eq("farmer_id", user.id),
     supabase.from("biomass_production").select("*").eq("farmer_id", user.id),
-    supabase.from("biochar_production").select("*").eq("farmer_id", user.id),
-    supabase.from("fertilizer_inventory").select("*").eq("farmer_id", user.id),
+    supabase
+      .from("biochar_production")
+      .select(
+        `
+        *,
+        biochar_storage (
+          quantity_stored,
+          quantity_remaining
+        )
+      `
+      )
+      .eq("farmer_id", user.id),
   ]);
 
+  const showGuide =
+    !landParcels?.length || !biomassRecords?.length || !biocharRecords?.length;
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
             Welcome back, {profile?.full_name}
           </h1>
-          <p className="text-muted-foreground">
-            Here&apos;s what&apos;s happening with your biochar production
-          </p>
         </div>
+        <p className="text-muted-foreground">Here's your production overview</p>
       </div>
 
-      {/* Show notifications if any */}
-      {notifications && notifications.length > 0 && (
-        <Alert>
-          <Bell className="h-4 w-4" />
-          <AlertTitle>Notifications</AlertTitle>
-          <AlertDescription>
-            You have {notifications.length} unread notifications.
-            {/* We can add a link to notifications page here */}
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Main Grid Layout */}
+      <div className="grid gap-6 lg:grid-cols-6">
+        {/* Left Column - Main Content */}
+        <div className="space-y-6 lg:col-span-4">
+          {/* Metrics */}
+          <DashboardMetrics metrics={metrics} />
 
-      {/* Progress Guide for New Farmers */}
-      {(!landParcels?.length ||
-        !biomassRecords?.length ||
-        !biocharRecords?.length ||
-        !fertilizerRecords?.length) && (
-        <FarmerProgressGuide
-          profile={profile}
-          hasLandParcels={Boolean(landParcels?.length)}
-          hasBiomassRecords={Boolean(biomassRecords?.length)}
-          hasBiocharProduction={Boolean(biocharRecords?.length)}
-          hasFertilizerRecords={Boolean(fertilizerRecords?.length)}
-        />
-      )}
-
-      {/* Dashboard Metrics */}
-      <DashboardMetrics metrics={metrics} />
-
-      {/* Production Chart and Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-4">
-          <ProductionChart farmerId={user.id} />
+          {/* Production Chart */}
+          <Suspense fallback={<ChartSkeleton />}>
+            <ProductionChart farmerId={user.id} />
+          </Suspense>
         </div>
-        <div className="col-span-3">
+
+        {/* Right Column - Status and Actions */}
+        <div className="space-y-6 lg:col-span-2">
+          <StockStatus
+            biomassRecords={biomassRecords}
+            biocharRecords={biocharRecords}
+          />
+
           <QuickActions
-            showGuide={!landParcels?.length}
-            hasBiomassRecords={Boolean(biomassRecords?.length)}
+            showGuide={showGuide}
+            hasBiomassRecords={!!biomassRecords?.length}
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function ChartSkeleton() {
+  return (
+    <div className="rounded-lg border bg-card h-[350px] flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
     </div>
   );
 }

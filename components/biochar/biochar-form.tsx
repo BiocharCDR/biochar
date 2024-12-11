@@ -94,6 +94,7 @@ export function BiocharForm({
   });
 
   async function onSubmit(data: BiocharFormValues) {
+    // console.log(data);
     setIsSubmitting(true);
     try {
       const {
@@ -117,9 +118,12 @@ export function BiocharForm({
 
       const biocharData = {
         ...data,
+        biomass_id: selectedBiomass.id,
         farmer_id: user.id,
         production_date: data.production_date.toISOString().split("T")[0],
       };
+
+      console.log(biocharData);
 
       if (isEdit && initialData) {
         // Update existing record

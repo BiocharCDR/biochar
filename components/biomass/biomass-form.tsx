@@ -124,6 +124,7 @@ export function BiomassForm({
           data.biomass_storage_date?.toISOString().split("T")[0] ?? null,
         biomass_storage_conditions: data.biomass_storage_conditions,
         biomass_quantity: data.biomass_quantity,
+        biomass_remaining: data.biomass_quantity,
         // Residue Storage
         residue_generated: data.residue_generated,
         residue_storage_location: data.residue_storage_location,
