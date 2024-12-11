@@ -30,8 +30,8 @@ export default function BiocharStorageInfo({
             <InfoIcon className="h-4 w-4" />
             <AlertTitle>No Storage Information</AlertTitle>
             <AlertDescription>
-              Storage details haven't been recorded for this production batch
-              yet.
+              Storage details haven&apos;t been recorded for this production
+              batch yet.
             </AlertDescription>
           </Alert>
         </CardContent>
