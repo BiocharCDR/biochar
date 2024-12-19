@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 interface FarmerParcelsProps {
   farmerId: string;
@@ -178,17 +179,17 @@ export function FarmerParcels({ farmerId }: FarmerParcelsProps) {
                   <TableHead className="whitespace-nowrap">
                     Parcel Name
                   </TableHead>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                     Total Area
                   </TableHead>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                     Cultivable Area
                   </TableHead>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                     Avg. Yield
                   </TableHead>
                   <TableHead className="whitespace-nowrap">Status</TableHead>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                     Verification
                   </TableHead>
                   <TableHead className="text-right whitespace-nowrap">
@@ -207,13 +208,13 @@ export function FarmerParcels({ farmerId }: FarmerParcelsProps) {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                       {parcel.total_area || 0} ha
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                       {parcel.cultivable_area || 0} ha
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className={cn("whitespace-nowrap", "hidden md:table-cell")}>
                       {parcel.avg_crop_yield || 0} t/ha
                     </TableCell>
                     <TableCell>
@@ -226,7 +227,7 @@ export function FarmerParcels({ farmerId }: FarmerParcelsProps) {
                         {parcel.status || "N/A"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={cn("hidden md:table-cell")}>
                       <Badge
                         variant={
                           parcel.verification_status === "verified"
