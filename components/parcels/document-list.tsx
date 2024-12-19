@@ -37,13 +37,13 @@ export function DocumentList({ documents }: DocumentListProps) {
             key={doc.id}
             className="flex items-center justify-between p-3 border rounded-lg"
           >
-            <div className="flex items-center gap-3">
-              <Icon className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium capitalize">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Icon className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium capitalize truncate">
                   {doc.document_type}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground truncate">
                   {doc.document_name}
                 </p>
               </div>
@@ -52,7 +52,7 @@ export function DocumentList({ documents }: DocumentListProps) {
               href={doc.document_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:underline flex-shrink-0 ml-4"
             >
               View Document
             </Link>
