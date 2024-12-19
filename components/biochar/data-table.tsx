@@ -40,6 +40,7 @@ import { BiocharProduction, PRODUCTION_STATUS } from "./types";
 import { SlidersHorizontal } from "lucide-react";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTablePagination } from "../biomass/data-table-pagination";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -155,7 +156,17 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={cn({
+                        "hidden md:table-cell": [
+                          "biomass_weight",
+                          "biochar_weight",
+                          "yield_percentage",
+                          "production_date",
+                        ].includes(header.id),
+                      })}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -176,7 +187,17 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={cn({
+                        "hidden md:table-cell": [
+                          "biomass_weight",
+                          "biochar_weight",
+                          "yield_percentage",
+                          "production_date",
+                        ].includes(cell.column.id),
+                      })}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

@@ -13,7 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
+import { formatDate, cn } from "@/lib/utils";
 
 import {
   Table,
@@ -182,18 +182,25 @@ export function FertilizerTable({ data }: FertilizerTableProps) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={cn({
+                      "hidden md:table-cell": [
+                        "purchase_date",
+                        "quantity",
+                        "fertilizer_type",
+                      ].includes(header.id),
+                    })}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -205,7 +212,16 @@ export function FertilizerTable({ data }: FertilizerTableProps) {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={cn({
+                        "hidden md:table-cell": [
+                          "purchase_date",
+                          "quantity",
+                          "fertilizer_type",
+                        ].includes(cell.column.id),
+                      })}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

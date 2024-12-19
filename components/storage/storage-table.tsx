@@ -33,7 +33,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatDate } from "@/lib/utils";
+import { formatDate, cn } from "@/lib/utils";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
@@ -250,18 +250,25 @@ export default function StorageTable({ data }: StorageTableProps) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={cn({
+                      "hidden md:table-cell": [
+                        "quantity_stored",
+                        "quantity_remaining",
+                        "storage_date",
+                      ].includes(header.id),
+                    })}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -273,7 +280,16 @@ export default function StorageTable({ data }: StorageTableProps) {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={cn({
+                        "hidden md:table-cell": [
+                          "quantity_stored",
+                          "quantity_remaining",
+                          "storage_date",
+                        ].includes(cell.column.id),
+                      })}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

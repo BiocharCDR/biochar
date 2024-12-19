@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { DataTablePagination } from "./data-table-pagination";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -185,7 +186,18 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={cn({
+                        "hidden md:table-cell": [
+                          "total_area",
+                          "cultivable_area",
+                          "avg_crop_yield",
+                          "verification_status",
+                          "created_at",
+                        ].includes(header.id),
+                      })}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -206,7 +218,18 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={cn({
+                        "hidden md:table-cell": [
+                          "total_area",
+                          "cultivable_area",
+                          "avg_crop_yield",
+                          "verification_status",
+                          "created_at",
+                        ].includes(cell.column.id),
+                      })}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
