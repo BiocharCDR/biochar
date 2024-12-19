@@ -153,9 +153,7 @@ const NewParcelPage = () => {
   async function uploadFile(file: File, parcelId: string, fileType: string) {
     const fileExt = file.name.split(".").pop();
     const fileName = `${parcelId}/${fileType}.${fileExt}`;
-    let bucket = "parcel-documents";
-
-    // Use shape-files bucket for shape files
+    const bucket = "parcel-documents";
 
     const { error: uploadError } = await supabase.storage
       .from(bucket)
