@@ -74,6 +74,7 @@ export function FarmerProduction({ farmerId }: FarmerProductionProps) {
           )
         `
         )
+        .eq("farmer_id", farmerId)
         .order("harvest_date", { ascending: false });
 
       setProductionData({

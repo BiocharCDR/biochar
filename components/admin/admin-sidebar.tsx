@@ -79,7 +79,7 @@ export function AdminSidebar() {
         <SheetTrigger asChild>
           <Button
             variant="ghost"
-            className="md:hidden fixed left-4 top-4 z-40"
+            className="md:hidden fixed left-4 top-4 z-50"
             size="icon"
           >
             <Menu />

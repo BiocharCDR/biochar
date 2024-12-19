@@ -156,9 +156,6 @@ const NewParcelPage = () => {
     let bucket = "parcel-documents";
 
     // Use shape-files bucket for shape files
-    if (fileType === "shape_file") {
-      bucket = "shape-files";
-    }
 
     const { error: uploadError } = await supabase.storage
       .from(bucket)
@@ -213,14 +210,14 @@ const NewParcelPage = () => {
       }
 
       //   // Upload shape file first if provided
-      //   let shapeFileUrl = "";
-      //   if (data.shape_file_url) {
-      //     shapeFileUrl = await uploadFile(
-      //       data.shape_file_url,
-      //       user.id,
-      //       "shape_file"
-      //     );
-      //   }
+      let shapeFileUrl = "";
+      if (data.shape_file_url) {
+        shapeFileUrl = await uploadFile(
+          data.shape_file_url,
+          user.id,
+          "shape_file"
+        );
+      }
 
       // Create parcel with all fields
       const { data: parcel, error: parcelError } = await supabase
@@ -231,7 +228,7 @@ const NewParcelPage = () => {
           total_area: data.total_area,
           cultivable_area: data.cultivable_area,
           gps_coordinates: data.gps_coordinates,
-          //   shape_file_url: shapeFileUrl,
+          shape_file_url: shapeFileUrl,
           avg_crop_yield: data.avg_crop_yield,
           avg_residue_yield: data.avg_residue_yield,
           avg_residue_consumption: data.avg_residue_consumption,
@@ -377,7 +374,7 @@ const NewParcelPage = () => {
                     <FormControl>
                       <Input
                         type="file"
-                        accept=".shp,.shx,.dbf,.prj,.sbn,.sbx"
+                        accept=".pdf,.jpeg,.jpg,.png"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) onChange(file);

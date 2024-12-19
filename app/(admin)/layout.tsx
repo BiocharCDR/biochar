@@ -29,11 +29,9 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="h-full relative">
-      <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0">
-        <AdminSidebar />
-      </div>
+      <AdminSidebar />
       <main className="md:pl-72">
-        <div className="p-8">{children}</div>
+        <div className="p-4 md:p-8 pt-16 md:pt-8">{children}</div>
       </main>
     </div>
   );
