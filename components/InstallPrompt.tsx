@@ -82,8 +82,8 @@ export default function InstallPrompt({
                   </p>
                   <ol className="text-sm text-gray-400 space-y-1 list-decimal pl-4">
                     <li>Tap the share button in your browser</li>
-                    <li>Scroll and select "Add to Home Screen"</li>
-                    <li>Tap "Add" to install</li>
+                    <li>Scroll and select &quot;Add to Home Screen&quot;</li>
+                    <li>Tap &quot;Add&quot; to install</li>
                   </ol>
                 </div>
               </div>
