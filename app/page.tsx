@@ -1,4 +1,6 @@
+/* eslint-disable */
 "use client";
+import InstallPrompt from "@/components/InstallPrompt";
 import Footer from "@/components/landing/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +14,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { animate, motion } from "framer-motion";
 import {
+  ArrowDownToLine,
   ArrowRight,
   BarChart,
   ExternalLink,
@@ -37,7 +40,9 @@ const stagger = {
 };
 
 const LandingPage = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [prompt, setPrompt] = useState<any>(null);
+
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -51,6 +56,54 @@ const LandingPage = () => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: any) => {
+      event.preventDefault();
+      setPrompt(event);
+
+      // Check if user has previously dismissed the prompt
+      const hasPromptBeenDismissed = localStorage.getItem(
+        "installPromptDismissed"
+      );
+
+      if (
+        !window.matchMedia("(display-mode: standalone)").matches &&
+        !hasPromptBeenDismissed
+      ) {
+        setOpen(true);
+      }
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (prompt) {
+      prompt.prompt();
+
+      prompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === "accepted") {
+          setOpen(false);
+        } else {
+          setOpen(false);
+        }
+
+        setPrompt(null);
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -219,7 +272,20 @@ const LandingPage = () => {
                   </Button>
                 </motion.div>
               </Link>
-              <Link href="/signup">
+              <Link
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (prompt) {
+                    prompt.prompt();
+                  } else {
+                    // If PWA install prompt is not available, show a message
+                    alert(
+                      "Download option is not available in your browser. Please use Chrome or Edge for the best experience."
+                    );
+                  }
+                }}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -227,10 +293,10 @@ const LandingPage = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className=" text-green-700 w-full sm:w-auto"
+                    className="text-green-400 border-green-400 hover:bg-green-400/10 w-full sm:w-auto"
                   >
-                    Watch Demo
-                    <ExternalLink className="ml-2 h-4 w-4" />
+                    Download App
+                    <ArrowDownToLine className="ml-2 h-4 w-4" />
                   </Button>
                 </motion.div>
               </Link>
@@ -403,6 +469,12 @@ const LandingPage = () => {
 
       {/* Footer */}
       <Footer />
+
+      <InstallPrompt
+        open={open}
+        onClose={handleCloseModal}
+        onInstall={handleInstallClick}
+      />
     </div>
   );
 };
