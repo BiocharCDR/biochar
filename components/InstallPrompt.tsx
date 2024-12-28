@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+import { ArrowDownToLine, Share2 } from "lucide-react";
+
 export default function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -42,24 +44,55 @@ export default function InstallPrompt() {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md animate-in slide-in-from-top duration-300">
         <DialogHeader>
-          <DialogTitle>Install App</DialogTitle>
+          <div className="flex items-center justify-center mb-4">
+            <h1 className="text-2xl font-bold tracking-tight">BIOCHAR MRV</h1>
+          </div>
+          <DialogTitle className="text-xl text-center">
+            Install BIOCHAR App
+          </DialogTitle>
+          <p className="text-center text-muted-foreground text-sm">
+            Get quick access to BIOCHAR right from your home screen
+          </p>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-6 py-4">
           {isIOS ? (
-            <p className="text-sm text-muted-foreground">
-              To install this app on your iOS device, tap the share button
-              <span role="img" aria-label="share icon" className="mx-1">
-                ⎋
-              </span>
-              and then "Add to Home Screen"
-              <span role="img" aria-label="plus icon" className="mx-1">
-                ➕
-              </span>
-            </p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                <Share2 className="w-6 h-6 text-muted-foreground shrink-0" />
+                <p className="text-sm">
+                  Tap the share button, then choose &quot;Add to Home
+                  Screen&quot;
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleClose}
+              >
+                Maybe Later
+              </Button>
+            </div>
           ) : (
-            <Button className="w-full" onClick={handleClose}>
-              Add to Home Screen
-            </Button>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                <ArrowDownToLine className="w-6 h-6 text-muted-foreground shrink-0" />
+                <p className="text-sm">
+                  Install BIOCHAR for a better experience with offline support
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Button className="w-full" onClick={handleClose}>
+                  Install App
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={handleClose}
+                >
+                  Not Now
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </DialogContent>

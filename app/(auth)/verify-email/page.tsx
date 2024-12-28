@@ -10,6 +10,7 @@ import {
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Mail, RotateCw } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React from "react";
@@ -46,7 +47,7 @@ export default function VerifyEmailPage() {
   return (
     <div className="container flex min-h-screen flex-col items-center justify-center">
       <div className="absolute top-8">
-        <img src="/logo-2.png" alt="GreenA" className="h-6" />
+        <Image src="/logo-2.png" alt="GreenA" className="h-6" />
       </div>
 
       <Card className="w-full max-w-[400px]">
